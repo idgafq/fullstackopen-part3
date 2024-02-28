@@ -88,7 +88,7 @@ app.put(`/api/persons/:id`, (req, res, next) => {
 
 app.get('/info', (req, res) => {
     const time = new Date()
-	Person.countDocuments({}, (err, count) => {
+	Person.count({}, (err, count) => {
 		if (!err) {
 			res.send(
 				`<p>
