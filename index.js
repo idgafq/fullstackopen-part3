@@ -11,6 +11,14 @@ morgan.token('body', (req, res) => {
 	return ''
 })
 
+const errorHandler = (err, req, res, next) => {
+	console.error(err.message)
+	if(err.name === 'CastError') {
+		return res.status(400).send({ error: 'malformatted id' })
+	}
+	next(err)
+}
+
 const app = express()
 app.use(express.static('dist'))
 app.use(cors())
@@ -23,28 +31,27 @@ app.get('/api/persons', (req, res) => {
 	})
 })
 
-app.get('/api/persons/:id', (req, res) => {
-	Person.findById(req.params.id).then((person) => {
-		res.json(person)
-	})
+app.get('/api/persons/:id', (req, res, next) => {
+	Person.findById(req.params.id)
+		.then((person) => {
+			if (person) {
+				res.json(person)
+			} else {
+				res.status(404).end()
+			}
+		})
+		.catch((err) => next(err))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id)
-	//const person = persons.find((person) => person.id === id)
-	const person = undefined
-	if (person) {
-    	persons = persons.filter((person) => person.id !== id)
-		console.log(`Deleted ${person.name}`)
-		res.statusMessage = `Deleted ${person.name}`
-		return res.status(204).end()
-	} else {
-		res.statusMessage = `No match foudn for id ${id}`
-		return res.status(204).end()
-	}
+app.delete('/api/persons/:id', (req, res, next) => {
+	Person.findByIdAndDelete(req.params.id)
+		.then((result) => {
+			res.status(204).end()
+		})
+		.catch((err) => next(err))
 })
 
-app.post(`/api/persons`, (req, res) => {
+app.post(`/api/persons`, (req, res, next) => {
 	const body = req.body
 
 	if (!body.name || !body.number) {
@@ -57,20 +64,45 @@ app.post(`/api/persons`, (req, res) => {
 		name: body.name,
 		number: body.number,
 	})
-	person.save().then((savedPerson) => {
-		res.json(savedPerson)
-	})
+	person
+		.save()
+		.then((savedPerson) => {
+			res.json(savedPerson)
+		})
+		.catch((err) => next(err))
+})
+
+app.put(`/api/persons/:id`, (req, res, next) => {
+	const body = req.body
+	const person = {
+		name: body.name,
+		number: body.number
+	}
+
+	Person.findByIdAndUpdate(req.params.id, person, { new: true })
+		.then((updatedPerson) => {
+			res.json(updatedPerson)
+		})
+		.catch((err) => next(err))
 })
 
 app.get('/info', (req, res) => {
     const time = new Date()
-    res.send(
-        `<p>
-			Phonebook has info for ${Person.find({}).length} people<br />
-            ${time}
-        <p>`
-    )
+	Person.countDocuments({}, (err, count) => {
+		if (!err) {
+			res.send(
+				`<p>
+					Phonebook has info for ${count} people<br />
+					${time}
+				</p>`
+			)
+		} else {
+			res.send(`<p>${err.message}</p>`)
+		}
+	})
 })
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
