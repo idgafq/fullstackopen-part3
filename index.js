@@ -45,8 +45,12 @@ app.get('/api/persons/:id', (req, res, next) => {
 
 app.delete('/api/persons/:id', (req, res, next) => {
 	Person.findByIdAndDelete(req.params.id)
-		.then((result) => {
-			res.status(204).end()
+		.then((data) => {
+			if (data) {
+				res.status(204).end()
+			} else {
+				res.status(404).end()
+			}
 		})
 		.catch((err) => next(err))
 })
@@ -88,18 +92,19 @@ app.put(`/api/persons/:id`, (req, res, next) => {
 
 app.get('/info', (req, res) => {
     const time = new Date()
-	Person.count({}, (err, count) => {
-		if (!err) {
+	Person.countDocuments({})
+		.then((count) => {
 			res.send(
 				`<p>
 					Phonebook has info for ${count} people<br />
 					${time}
 				</p>`
 			)
-		} else {
+		})
+		.catch((err) => {
 			res.send(`<p>${err.message}</p>`)
-		}
-	})
+			next(err)
+		})
 })
 
 app.use(errorHandler)
