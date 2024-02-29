@@ -4,7 +4,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
 
-morgan.token('body', (req, res) => {
+morgan.token('body', (req) => {
 	if (req.method === 'POST') {
 		return JSON.stringify(req.body)
 	}
@@ -28,7 +28,7 @@ app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/api/persons', (req, res) => {
-    Person.find({}).then((persons) => {
+	Person.find({}).then((persons) => {
 		res.json(persons)
 	})
 })
@@ -57,7 +57,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
 		.catch((err) => next(err))
 })
 
-app.post(`/api/persons`, (req, res, next) => {
+app.post('/api/persons', (req, res, next) => {
 	const body = req.body
 
 	if (!body.name || !body.number) {
@@ -78,7 +78,7 @@ app.post(`/api/persons`, (req, res, next) => {
 		.catch((err) => next(err))
 })
 
-app.put(`/api/persons/:id`, (req, res, next) => {
+app.put('/api/persons/:id', (req, res, next) => {
 	const { name, number } = req.body
 
 	Person.findByIdAndUpdate(
@@ -92,8 +92,8 @@ app.put(`/api/persons/:id`, (req, res, next) => {
 		.catch((err) => next(err))
 })
 
-app.get('/info', (req, res) => {
-    const time = new Date()
+app.get('/info', (req, res, next) => {
+	const time = new Date()
 	Person.countDocuments({})
 		.then((count) => {
 			res.send(
@@ -111,5 +111,6 @@ app.get('/info', (req, res) => {
 
 app.use(errorHandler)
 
+/* global process */
 const PORT = process.env.PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
