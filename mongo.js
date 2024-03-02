@@ -2,7 +2,7 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 /* global process */
-const url = process.env.MONGO_URI
+const url = process.env.MONGODB_URI
 
 const personSchema = new mongoose.Schema({
 	name: String,
