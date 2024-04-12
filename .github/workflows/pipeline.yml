@@ -23,12 +23,10 @@ jobs:
       - name: Check style
         run: npm run lint
       - name: Build
-        id: build_step
-        run: npm run build
+        run: npm run build:frontend
       - name: e2e Test
         run: npm run test:e2e
       - name: Trigger deployment
-        id: deploy_step
         if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message), '#skip') }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
   tag_release:
