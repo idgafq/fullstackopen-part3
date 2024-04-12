@@ -5,7 +5,7 @@ describe('Phonebook', () => {
 		await page.goto('')
 		await expect(page.getByText('Phonebook')).toBeVisible()
 		await expect(page.getByText('Add a new')).toBeVisible()
-		await expect(page.getByText('add')).toBeVisible()
+		await expect(page.getByText('name:')).toBeVisible()
 		await expect(page.getByText('Numbers')).toBeVisible()
 	})
 })
