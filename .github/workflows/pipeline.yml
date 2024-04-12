@@ -23,7 +23,7 @@ jobs:
       - name: Check style
         run: |
           npm run lint
-          cd frontend && npm run lint
+          cd frontend && npm install --save-dev eslint-plugin-react && npm run lint
       - name: Build
         run: npm run build:frontend
       - name: e2e Test
